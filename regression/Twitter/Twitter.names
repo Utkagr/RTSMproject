@@ -30,7 +30,7 @@
         and normalized. First order discrete difference over features may also 
         be considered as additional features. Please see the reference to get
         further details regarding the results.
-
+  
 4. Relevant Information Paragraph:
    -- Observations : 
         Each instance covers height weeks of observation for a specific topic (eg. 
@@ -38,7 +38,6 @@
         the couple weeks following this initial observation.
 
         Observations are Independent and identically distributed.
-
 
 5. Number of Instances
    -- Total number of instances : 38393
