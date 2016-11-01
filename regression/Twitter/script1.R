@@ -31,7 +31,7 @@ set.seed(100)
 ndata <- ndata[sample(1:nrow(ndata), 98373,replace=FALSE),]
 
 model=lm(MNAD~.,ndata)
-bmodel <- step(model, direction = "backward", trace=FALSE )
+bmodel <- step(model, direction = "backward", trace=TRUE )
 bmodel
 # CS,AT,ADL are not being used in backward process.
 #Partial F-test
@@ -42,8 +42,12 @@ anova(partial_model,full_model)
 # Since F = 0.1488 we cannot reject the null hypothesis at the 5% level of significance.
 # This shows that features namely CS,AT and ADL are not significant and they can be removed from the model
 # as shown by the backward elimination method as well.
-summary(model)
-plot(model)
+summary(bmodel)
+plot(bmodel)
+
+cor(ndata[-c(7,8,10,12)])
+model_test <- lm(MNAD ~ NCD + BL,ndata)
+summary(model_test)
 
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
