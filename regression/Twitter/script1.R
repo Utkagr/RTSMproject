@@ -10,20 +10,45 @@ names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
                   "AT_0","AT_1","AT_2","AT_3","AT_4","AT_5","AT_6",
                   "NA_0","NA_1","NA_2","NA_3","NA_4","NA_5","NA_6",
                   "ADL_0","ADL_1","ADL_2","ADL_3","ADL_4","ADL_5","ADL_6",
-                  "NAD_0","NAD_1","NAD_2","NAD_3","NAD_4","NAD_5","NAD_6","MNAD"
-)
-x_instances <- c(1:583249)
+                  "NAD_0","NAD_1","NAD_2","NAD_3","NAD_4","NAD_5","NAD_6","MNAD")
+ndata <- NULL
+ndata$NCD <- rowSums(tdata[c(1:7)])
+ndata$AI <- rowSums(tdata[c(8:14)])
+ndata$AS_NA <- rowSums(tdata[c(15:21)])
+ndata$BL <- rowSums(tdata[c(22:28)])
+ndata$NAC <- rowSums(tdata[c(29:35)])
+ndata$AS_NAC <- rowSums(tdata[c(36:42)])
+ndata$CS <- rowSums(tdata[c(43:49)])
+ndata$AT <- rowSums(tdata[c(50:56)])
+ndata$NAO <- rowSums(tdata[c(57:63)])
+ndata$ADL <- rowSums(tdata[c(64:70)])
+ndata$NAD <- rowSums(tdata[c(71:77)])
+ndata$MNAD <- tdata$MNAD
+ndata <- data.frame(ndata)
+View(ndata)
 
-ncd_data <- tdata[c(1:7)]
-ai_data <- tdata[c(8:14)]
-as_na_data <- tdata[c(15:21)]
-bl_data <- tdata[c(22:28)]
-nac_data <- tdata[c(29:35)]
-cs_data <- tdata[c(36:42)]
-at_data <- tdata[c(43,49)]
-na_data <- tdata[c(50,56)]
-adl_data <- tdata[c(57,63)]
-nad_data <- tdata[c(64,70)]
+set.seed(100)
+ndata <- ndata[sample(1:nrow(ndata), 98373,replace=FALSE),]
 
-#View(ncd_data)
-plot(tdata$NCD_0,tdata$NCD_1,type="l",col="red")
+model=lm(MNAD~.,ndata)
+bmodel <- step(model, direction = "backward", trace=FALSE )
+bmodel
+# CS,AT,ADL are not being used in backward process.
+#Partial F-test
+full_model <- model
+partial_model <- lm(formula = MNAD ~ NCD + AI + AS_NA + BL + NAC + AS_NAC + CS + NAO + NAD, data = ndata)
+anova(partial_model,full_model)
+# F-value 0.1488
+# Since F = 0.1488 we cannot reject the null hypothesis at the 5% level of significance.
+# This shows that features namely CS,AT and ADL are not significant and they can be removed from the model
+# as shown by the backward elimination method as well.
+summary(model)
+plot(model)
+
+coefficients(model) # model coefficients
+confint(model, level=0.95) # CIs for model parameters
+fitted(model) # predicted values
+residuals(model) # residuals
+anova(model) # anova table
+vcov(model) # covariance matrix for model parameters
+influence(model) # regression diagnostics 
