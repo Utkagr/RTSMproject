@@ -12,3 +12,18 @@ names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
                   "ADL_0","ADL_1","ADL_2","ADL_3","ADL_4","ADL_5","ADL_6",
                   "NAD_0","NAD_1","NAD_2","NAD_3","NAD_4","NAD_5","NAD_6","MNAD"
 )
+x_instances <- c(1:583249)
+
+ncd_data <- tdata[c(1:7)]
+ai_data <- tdata[c(8:14)]
+as_na_data <- tdata[c(15:21)]
+bl_data <- tdata[c(22:28)]
+nac_data <- tdata[c(29:35)]
+cs_data <- tdata[c(36:42)]
+at_data <- tdata[c(43,49)]
+na_data <- tdata[c(50,56)]
+adl_data <- tdata[c(57,63)]
+nad_data <- tdata[c(64,70)]
+
+#View(ncd_data)
+plot(tdata$NCD_0,tdata$NCD_1,type="l",col="red")
