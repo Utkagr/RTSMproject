@@ -165,9 +165,8 @@ print(table_res,row.names = FALSE)
 # 19.5     16.424317   3.0756833
 
 plot(bmodel)
-plot(train$MNAD,train$NCD)
-plot(train$MNAD,train$AT)
-plot(train$MNAD,train$BL)
+plot(train$NCD,train$MNAD)
+#plot(train$AT,train$MNAD)
 
 ------------------------------------------
 coefficients(model) # model coefficients
