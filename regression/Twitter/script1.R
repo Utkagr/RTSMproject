@@ -96,6 +96,22 @@ fmodel=lm(MNAD~NCD+BL+AT,train)
 summary(fmodel)
 
 bmodel <- step(fmodel, direction = "backward", trace=TRUE )
+# Start:  AIC=1500277
+# MNAD ~ NCD + BL + AT
+# 
+# Df  Sum of Sq        RSS     AIC
+# - BL    1 9.1182e+04 6.8352e+09 1500277
+# <none>               6.8351e+09 1500277
+# - AT    1 2.2775e+05 6.8353e+09 1500280
+# - NCD   1 4.5241e+10 5.2076e+10 1782251
+# 
+# Step:  AIC=1500277
+# MNAD ~ NCD + AT
+# 
+# Df  Sum of Sq        RSS     AIC
+# <none>               6.8352e+09 1500277
+# - AT    1 1.8872e+05 6.8354e+09 1500279
+# - NCD   1 4.6140e+10 5.2975e+10 1784625
 bmodel
 # BL are not being used in backward process.
 
@@ -130,7 +146,10 @@ summary(bmodel)
 
 plot(bmodel)
 
-library(plotly)
+plot(train$MNAD,train$NCD)
+plot(train$MNAD,train$AT)
+plot(train$MNAD,train$BL)
+
 ------------------------------------------
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
