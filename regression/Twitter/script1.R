@@ -210,6 +210,8 @@ plot(bmodel)
 plot(train$NCD,train$MNAD)
 #plot(train$AT,train$MNAD)
 
+#Final Equation
+#MNAD = 0.1495 * NCD - 0.22278 * AT + 4.2515888
 ------------------------------------------
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
