@@ -28,15 +28,25 @@ ndata <- data.frame(ndata)
 View(ndata)
 
 set.seed(100)
-ndata <- ndata[sample(1:nrow(ndata), 98373,replace=FALSE),]
+ndata <- ndata[sample(1:nrow(ndata), 198373,replace=FALSE)]
 
-model=lm(MNAD~.,ndata)
+#split data
+smp_size <- floor(0.70 * nrow(ndata))
+
+## set the seed to make your partition reproductible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(ndata)), size = smp_size)
+
+train <- ndata[train_ind, ]
+test <- ndata[-train_ind, ]
+
+model=lm(MNAD~.,train)
 bmodel <- step(model, direction = "backward", trace=TRUE )
 bmodel
 # CS,AT,ADL are not being used in backward process.
 #Partial F-test
 full_model <- model
-partial_model <- lm(formula = MNAD ~ NCD + AI + AS_NA + BL + NAC + AS_NAC + CS + NAO + NAD, data = ndata)
+partial_model <- lm(formula = MNAD ~ NCD + AI + AS_NA + BL + NAC + AS_NAC + CS + NAO + NAD, data = train)
 anova(partial_model,full_model)
 # F-value 0.1488
 # Since F = 0.1488 we cannot reject the null hypothesis at the 5% level of significance.
@@ -45,8 +55,8 @@ anova(partial_model,full_model)
 summary(bmodel)
 plot(bmodel)
 
-cor(ndata[-c(7,8,10,12)])
-model_test <- lm(MNAD ~ NCD + BL,ndata)
+cor(train[-c(7,8,10,12)])
+model_test <- lm(MNAD ~ NCD + BL,train)
 summary(model_test)
 
 coefficients(model) # model coefficients
