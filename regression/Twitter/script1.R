@@ -28,13 +28,12 @@ ndata <- data.frame(ndata)
 View(ndata)
 
 set.seed(100)
-ndata <- ndata[sample(1:nrow(ndata), 198373,replace=FALSE)]
+ndata <- ndata[sample(1:nrow(ndata), 198373,replace=FALSE),]
 
 #split data
 smp_size <- floor(0.70 * nrow(ndata))
 
 ## set the seed to make your partition reproductible
-set.seed(123)
 train_ind <- sample(seq_len(nrow(ndata)), size = smp_size)
 
 train <- ndata[train_ind, ]
