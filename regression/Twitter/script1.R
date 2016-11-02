@@ -104,38 +104,33 @@ full_model <- model
 partial_model <- lm(formula = MNAD ~ NCD + AT, data = train)
 
 anova(partial_model,full_model)
-# F-value 0.1488
-# Since F = 0.1488 we cannot reject the null hypothesis at the 5% level of significance.
+
+# F-value 1329.4
+# Since F = 1329.4 we cannot reject the null hypothesis at the 5% level of significance.
 # This shows that features others than NCD and AT are not significant and they can be removed from the model
 # as shown by the backward elimination method as well.
+
 summary(bmodel)
+
+# Residuals:
+#   Min       1Q   Median       3Q      Max 
+# -30929.0    -12.5     -3.8      1.3  19617.2 
+# 
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)  4.251589   1.040175   4.087 4.37e-05 ***
+#   NCD          1.046882   0.001081 968.160  < 2e-16 ***
+#   AT          -1.559474   0.796442  -1.958   0.0502 .  
+# ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 221.9 on 138858 degrees of freedom
+# Multiple R-squared:  0.871,	Adjusted R-squared:  0.871 
+# F-statistic: 4.688e+05 on 2 and 138858 DF,  p-value: < 2.2e-16
+
 plot(bmodel)
 
-cor(train[-c(7,8,10,12)])
-# NCD        AI     AS_NA        BL       NAC    AS_NAC       NAO       NAD
-# NCD    1.0000000 0.8960842 0.9098754 0.1391940 0.9976860 0.9298740 0.9659738 0.9999967
-# AI     0.8960842 1.0000000 0.8840961 0.1441461 0.8935802 0.8245625 0.9517736 0.8960426
-# AS_NA  0.9098754 0.8840961 1.0000000 0.1587554 0.9167618 0.9746305 0.9477773 0.9102416
-# BL     0.1391940 0.1441461 0.1587554 1.0000000 0.1416718 0.1513139 0.1490874 0.1393019
-# NAC    0.9976860 0.8935802 0.9167618 0.1416718 1.0000000 0.9356922 0.9700020 0.9978282
-# AS_NAC 0.9298740 0.8245625 0.9746305 0.1513139 0.9356922 1.0000000 0.9160259 0.9301859
-# NAO    0.9659738 0.9517736 0.9477773 0.1490874 0.9700020 0.9160259 1.0000000 0.9661963
-# NAD    0.9999967 0.8960426 0.9102416 0.1393019 0.9978282 0.9301859 0.9661963 1.0000000
-
-vif(train[-c(7,8,10)])
-# Variables          VIF
-# 1       NCD 3.276243e+05
-# 2        AI 1.645799e+01
-# 3     AS_NA 1.725390e+02
-# 4        BL 1.042925e+00
-# 5       NAC 6.366179e+02
-# 6    AS_NAC 1.414145e+02
-# 7       NAO 2.379112e+02
-# 8       NAD 3.451722e+05
-# 9      MNAD 1.115173e+01
-
-
-
+library(plotly)
 ------------------------------------------
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
