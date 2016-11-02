@@ -65,39 +65,48 @@ cor(train[-c(12)])
 # ADL    0.007010232 0.01451899 0.01593872 0.1382283 0.01482118 0.01664059 0.1826403 0.97847596 0.01473811 1.000000000 0.007257399
 # NAD    0.999996666 0.89604255 0.91024159 0.1393019 0.99782822 0.93018592 0.1356946 0.01774714 0.96619635 0.007257399 1.000000000
 
+# Correlated features
+# NCD,AI,AS_NA,NAC,AS_NAC,NAO,NAD
+# BL,CS
+# AT,ADL
+
+# NCD,BL,AT- final features
 library(usdm)
 vif(train[-c(12)])
-
-
-bmodel <- step(model, direction = "backward", trace=TRUE )
-bmodel
-# AT,ADL are not being used in backward process.
-cor(train[-c(8,10,12)])
-
-library(usdm)
-vif(train[-c(8,10,12)])
 # Variables          VIF
-# 1        NCD 476514.10783
-# 2         AI     15.26075
-# 3      AS_NA    210.33629
-# 4         BL    102.56046
-# 5        NAC    739.52219
-# 6     AS_NAC    180.65718
-# 7         CS    103.96194
-# 8         AT     16.81331
-# 9        NAO    140.25025
-# 10       ADL     18.24468
-# 11       NAD 504792.60212
+# 1        NCD 476162.91890
+# 2         AI     14.44163
+# 3      AS_NA     69.43899
+# 4         BL    116.88323
+# 5        NAC    829.32689
+# 6     AS_NAC     60.86040
+# 7         CS    118.03428
+# 8         AT     29.45727
+# 9        NAO    152.18498
+# 10       ADL     31.17910
+# 11       NAD 508429.69193
+
+vif(train[c(1,4,8)])
+# Variables      VIF
+# 1       NCD 1.033293
+# 2        BL 1.109646
+# 3        AT 1.075400
+
+fmodel=lm(MNAD~NCD+BL+AT,train)
+summary(fmodel)
+
+bmodel <- step(fmodel, direction = "backward", trace=TRUE )
+bmodel
+# BL are not being used in backward process.
 
 #Partial F-test
 full_model <- model
-partial_model <- lm(formula = MNAD ~ NCD + AI + AS_NA + BL + NAC + AS_NAC + CS + NAO + NAD, data = train)
-
+partial_model <- lm(formula = MNAD ~ NCD + AT, data = train)
 
 anova(partial_model,full_model)
 # F-value 0.1488
 # Since F = 0.1488 we cannot reject the null hypothesis at the 5% level of significance.
-# This shows that features namely CS,AT and ADL are not significant and they can be removed from the model
+# This shows that features others than NCD and AT are not significant and they can be removed from the model
 # as shown by the backward elimination method as well.
 summary(bmodel)
 plot(bmodel)
