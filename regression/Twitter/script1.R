@@ -144,8 +144,27 @@ summary(bmodel)
 # Multiple R-squared:  0.871,	Adjusted R-squared:  0.871 
 # F-statistic: 4.688e+05 on 2 and 138858 DF,  p-value: < 2.2e-16
 
-plot(bmodel)
+res <- residuals(bmodel)[102:112]
+fit <- fitted(bmodel)[102:112]
+y <- train$MNAD[102:112]
+table_res <- data.frame(y,fit,res)
+names(table_res) <- c("y(MNAD)","Fitted values","Residuals")
+print(table_res,row.names = FALSE)
 
+# y(MNAD) Fitted values   Residuals
+# 1.5      4.000975  -2.5009753
+# 13.0     15.920326  -2.9203259
+# 29.0     32.918951  -3.9189507
+# 1.0      6.952869  -5.9528691
+# 20.0     22.940805  -2.9408046
+# 3.5      4.709551  -1.2095513
+# 43.5     33.949011   9.5509893
+# 8.0      7.325206   0.6747944
+# 86.0    118.518843 -32.5188430
+# 6.5      9.492196  -2.9921964
+# 19.5     16.424317   3.0756833
+
+plot(bmodel)
 plot(train$MNAD,train$NCD)
 plot(train$MNAD,train$AT)
 plot(train$MNAD,train$BL)
