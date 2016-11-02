@@ -140,6 +140,10 @@ bmodel <- step(fmodel, direction = "backward", trace=TRUE )
 bmodel
 # BL are not being used in backward process.
 
+coefficients(bmodel)
+# (Intercept)         NCD          AT 
+# 4.2515888   0.1495545  -0.2227820 
+
 #Partial F-test
 full_model <- model
 partial_model <- lm(formula = MNAD ~ NCD + AT, data = train)
