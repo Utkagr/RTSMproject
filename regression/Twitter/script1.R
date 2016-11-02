@@ -42,6 +42,31 @@ test <- ndata[-train_ind, ]
 model=lm(MNAD~.,train)
 
 summary(model)
+# Residuals:
+#   Min       1Q   Median       3Q      Max 
+# -28672.8    -13.0     -2.4      3.1  21192.6 
+# 
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept) -1.055e+00  3.714e+00  -0.284    0.776    
+# NCD          4.560e+00  1.039e-01  43.888  < 2e-16 ***
+#   AI          -2.364e-02  1.185e-03 -19.958  < 2e-16 ***
+#   AS_NA        4.857e+04  1.647e+03  29.498  < 2e-16 ***
+#   BL          -3.733e+01  5.791e+00  -6.447 1.15e-10 ***
+#   NAC          4.786e-02  4.167e-03  11.487  < 2e-16 ***
+#   AS_NAC      -1.900e+04  2.555e+03  -7.439 1.02e-13 ***
+#   CS           3.778e+01  5.844e+00   6.465 1.02e-10 ***
+#   AT          -5.590e-01  5.637e-01  -0.992    0.321    
+# NAO         -6.686e-02  2.375e-03 -28.150  < 2e-16 ***
+#   ADL          4.990e-01  5.303e-01   0.941    0.347    
+# NAD         -4.430e+00  1.069e-01 -41.455  < 2e-16 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 212.9 on 138849 degrees of freedom
+# Multiple R-squared:  0.8812,	Adjusted R-squared:  0.8812 
+# F-statistic: 9.366e+04 on 11 and 138849 DF,  p-value: < 2.2e-16
+
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
 fitted(model) # predicted values
@@ -163,6 +188,19 @@ print(table_res,row.names = FALSE)
 # 86.0    118.518843 -32.5188430
 # 6.5      9.492196  -2.9921964
 # 19.5     16.424317   3.0756833
+
+confint(bmodel, level=0.95) # CIs for model parameters
+#                 2.5 %     97.5 %
+# (Intercept)  2.2128654 6.2903122502
+# NCD          0.1492518 0.1498572890
+# AT          -0.4457836 0.0002196872
+
+vcov(bmodel) 
+# covariance matrix for model parameters
+#               (Intercept)           NCD            AT
+# (Intercept)  1.081964e+00 -2.780162e-05 -9.448432e-02
+# NCD         -2.780162e-05  2.386190e-08 -3.084644e-07
+# AT          -9.448432e-02 -3.084644e-07  1.294531e-02
 
 plot(bmodel)
 plot(train$NCD,train$MNAD)
