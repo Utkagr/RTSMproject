@@ -119,7 +119,8 @@ vif(train[c(1,4,8)])
 
 fmodel=lm(MNAD~NCD+BL+AT,train)
 summary(fmodel)
-
+BIC(fmodel)
+# 1894399
 bmodel <- step(fmodel, direction = "backward", trace=TRUE )
 # Start:  AIC=1500277
 # MNAD ~ NCD + BL + AT
@@ -138,6 +139,8 @@ bmodel <- step(fmodel, direction = "backward", trace=TRUE )
 # - AT    1 1.8872e+05 6.8354e+09 1500279
 # - NCD   1 4.6140e+10 5.2975e+10 1784625
 bmodel
+BIC(bmodel)
+# 1894389
 # BL are not being used in backward process.
 
 coefficients(bmodel)
@@ -149,6 +152,16 @@ full_model <- model
 partial_model <- lm(formula = MNAD ~ NCD + AT, data = train)
 
 anova(partial_model,full_model)
+# Analysis of Variance Table
+# 
+# Model 1: MNAD ~ NCD + AT
+# Model 2: MNAD ~ NCD + AI + AS_NA + BL + NAC + AS_NAC + CS + AT + NAO + 
+#   ADL + NAD
+# Res.Df        RSS Df Sum of Sq      F    Pr(>F)    
+# 1 138858 6835194616                                  
+# 2 138849 6292933436  9 542261180 1329.4 < 2.2e-16 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 # F-value 1329.4
 # Since F = 1329.4 we cannot reject the null hypothesis at the 5% level of significance.
