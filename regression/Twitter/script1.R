@@ -12,6 +12,14 @@ names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
                   "ADL_0","ADL_1","ADL_2","ADL_3","ADL_4","ADL_5","ADL_6",
                   "NAD_0","NAD_1","NAD_2","NAD_3","NAD_4","NAD_5","NAD_6","MNAD")
 ndata <- NULL
+table_res<- NULL
+train <- NULL
+test <- NULL
+model <- NULL
+fmodel <- NULL
+full_model <- NULL
+bmodel <- NULL
+
 ndata$NCD <- rowSums(tdata[c(1:7)])
 ndata$AI <- rowSums(tdata[c(8:14)])
 ndata$AS_NA <- rowSums(tdata[c(15:21)])
@@ -25,50 +33,24 @@ ndata$ADL <- rowSums(tdata[c(64:70)])
 ndata$NAD <- rowSums(tdata[c(71:77)])
 ndata$MNAD <- tdata$MNAD
 ndata <- data.frame(ndata)
-View(ndata)
 
 set.seed(100)
-ndata <- ndata[sample(1:nrow(ndata), 198373,replace=FALSE),]
-
+ndata <- ndata[1:198373,]
+ndata <- scale(ndata)
+ndata <- data.frame(ndata)
+View(ndata)
 #split data
 smp_size <- floor(0.70 * nrow(ndata))
-
-## set the seed to make your partition reproductible
-train_ind <- sample(seq_len(nrow(ndata)), size = smp_size)
-
-train <- ndata[train_ind, ]
-test <- ndata[-train_ind, ]
+train <- ndata[1:smp_size,]
+test <- ndata[smp_size+1:nrow(ndata),]
 
 model=lm(MNAD~.,train)
-
 summary(model)
-# Residuals:
-#   Min       1Q   Median       3Q      Max 
-# -28672.8    -13.0     -2.4      3.1  21192.6 
-# 
-# Coefficients:
-#   Estimate Std. Error t value Pr(>|t|)    
-# (Intercept) -1.055e+00  3.714e+00  -0.284    0.776    
-# NCD          4.560e+00  1.039e-01  43.888  < 2e-16 ***
-#   AI          -2.364e-02  1.185e-03 -19.958  < 2e-16 ***
-#   AS_NA        4.857e+04  1.647e+03  29.498  < 2e-16 ***
-#   BL          -3.733e+01  5.791e+00  -6.447 1.15e-10 ***
-#   NAC          4.786e-02  4.167e-03  11.487  < 2e-16 ***
-#   AS_NAC      -1.900e+04  2.555e+03  -7.439 1.02e-13 ***
-#   CS           3.778e+01  5.844e+00   6.465 1.02e-10 ***
-#   AT          -5.590e-01  5.637e-01  -0.992    0.321    
-# NAO         -6.686e-02  2.375e-03 -28.150  < 2e-16 ***
-#   ADL          4.990e-01  5.303e-01   0.941    0.347    
-# NAD         -4.430e+00  1.069e-01 -41.455  < 2e-16 ***
-#   ---
-#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 212.9 on 138849 degrees of freedom
-# Multiple R-squared:  0.8812,	Adjusted R-squared:  0.8812 
-# F-statistic: 9.366e+04 on 11 and 138849 DF,  p-value: < 2.2e-16
+# R-sq: 0.8616
 
 coefficients(model) # model coefficients
 confint(model, level=0.95) # CIs for model parameters
+
 fitted(model) # predicted values
 residuals(model) # residuals
 anova(model) # anova table
@@ -77,18 +59,6 @@ vcov(model) # covariance matrix for model parameters
 
 #Multicollinearity test
 cor(train[-c(12)])
-# NCD         AI      AS_NA        BL        NAC     AS_NAC        CS         AT        NAO         ADL         NAD
-# NCD    1.000000000 0.89608420 0.90987541 0.1391940 0.99768601 0.92987404 0.1355409 0.01755077 0.96597384 0.007010232 0.999996666
-# AI     0.896084203 1.00000000 0.88409612 0.1441461 0.89358021 0.82456251 0.1405532 0.02616687 0.95177357 0.014518987 0.896042552
-# AS_NA  0.909875408 0.88409612 1.00000000 0.1587554 0.91676177 0.97463052 0.1554692 0.02694857 0.94777728 0.015938723 0.910241595
-# BL     0.139194011 0.14414611 0.15875538 1.0000000 0.14167185 0.15131391 0.9938294 0.16125454 0.14908739 0.138228315 0.139301888
-# NAC    0.997686011 0.89358021 0.91676177 0.1416718 1.00000000 0.93569224 0.1387636 0.02335153 0.97000202 0.014821184 0.997828215
-# AS_NAC 0.929874035 0.82456251 0.97463052 0.1513139 0.93569224 1.00000000 0.1484329 0.02533037 0.91602594 0.016640591 0.930185923
-# CS     0.135540911 0.14055320 0.15546919 0.9938294 0.13876355 0.14843286 1.0000000 0.19853576 0.14585463 0.182640261 0.135694579
-# AT     0.017550775 0.02616687 0.02694857 0.1612545 0.02335153 0.02533037 0.1985358 1.00000000 0.02534607 0.978475956 0.017747143
-# NAO    0.965973844 0.95177357 0.94777728 0.1490874 0.97000202 0.91602594 0.1458546 0.02534607 1.00000000 0.014738109 0.966196345
-# ADL    0.007010232 0.01451899 0.01593872 0.1382283 0.01482118 0.01664059 0.1826403 0.97847596 0.01473811 1.000000000 0.007257399
-# NAD    0.999996666 0.89604255 0.91024159 0.1393019 0.99782822 0.93018592 0.1356946 0.01774714 0.96619635 0.007257399 1.000000000
 
 # Correlated features
 # NCD,AI,AS_NA,NAC,AS_NAC,NAO,NAD
@@ -152,6 +122,7 @@ full_model <- model
 partial_model <- lm(formula = MNAD ~ NCD + AT, data = train)
 
 anova(partial_model,full_model)
+#anova(bmodel,model)
 # Analysis of Variance Table
 # 
 # Model 1: MNAD ~ NCD + AT

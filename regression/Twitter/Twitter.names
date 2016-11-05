@@ -52,7 +52,6 @@
         of the feature `Nb_Active_Discussion' at time t is given in 
         'Nb_Active_Discussion_t'.
 
-
 7. Attributes
 
     -- Number of Created Discussions (NCD) (columns [0,6])
@@ -253,7 +252,6 @@
           +---------+-----+-----+-------+-------+
           | CS_6    | 0   | 1   | 0.961 | 0.194 |
           +---------+-----+-----+-------+-------+
-
 
     -- Author Interaction (AT) (columns [49,55])
 
