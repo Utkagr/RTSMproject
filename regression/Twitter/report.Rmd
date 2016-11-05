@@ -1,5 +1,5 @@
 ---
-title: "Online Buzz prediction on Twitter"
+title: "Online Buzz Prediction on Twitter"
 output: github_document
 ---
 
