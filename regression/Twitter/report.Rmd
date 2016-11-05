@@ -4,7 +4,7 @@ output: github_document
 ---
 
 ```{r include=FALSE}
-#tdata <- read.csv("/home/utkarsh/rtsm/regression/Twitter/Twitter.data")
+tdata <- read.csv("/home/utkarsh/rtsm/regression/Twitter/Twitter.data")
 names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
                   "AI_0","AI_1","AI_2","AI_3","AI_4","AI_5","AI_6",
                   "AS(NA)_0","AS(NA)_1","AS(NA)_2","AS(NA)_3","AS(NA)_4","AS(NA)_5","AS(NA)_6",
@@ -156,10 +156,10 @@ Now, our model seems good.
 But, we can still drop a variable to check if our model improves or not.
 For that,we can use methods of regression for propagating back-and-forth.
 
-## METHODS OF REGRESSION
-# 1.Forward Selection Method
-# 2.Backward Elimination Method
-# 3.Stepwise Method
+# METHODS OF REGRESSION
+1.Forward Selection Method
+2.Backward Elimination Method
+3.Stepwise Method
 
 For our analysis,we have considered Backward elimination method.
 ```{r}
