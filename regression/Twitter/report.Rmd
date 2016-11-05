@@ -1,0 +1,188 @@
+---
+title: "Online Buzz prediction on Twitter"
+output: github_document
+---
+
+```{r include=FALSE}
+tdata <- read.csv("/home/utkarsh/rtsm/regression/Twitter/Twitter.data")
+View(tdata)
+names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
+                  "AI_0","AI_1","AI_2","AI_3","AI_4","AI_5","AI_6",
+                  "AS(NA)_0","AS(NA)_1","AS(NA)_2","AS(NA)_3","AS(NA)_4","AS(NA)_5","AS(NA)_6",
+                  "BL_0","BL_1","BL_2","BL_3","BL_4","BL_5","BL_6",
+                  "NAC_0","NAC_1","NAC_2","NAC_3","NAC_4","NAC_5","NAC_6",
+                  "AS(NAC)_0","AS(NAC)_1","AS(NAC)_2","AS(NAC)_3","AS(NAC)_4","AS(NAC)_5","AS(NAC)_6",
+                  "CS_0","CS_1","CS_2","CS_3","CS_4","CS_5","CS_6",
+                  "AT_0","AT_1","AT_2","AT_3","AT_4","AT_5","AT_6",
+                  "NA_0","NA_1","NA_2","NA_3","NA_4","NA_5","NA_6",
+                  "ADL_0","ADL_1","ADL_2","ADL_3","ADL_4","ADL_5","ADL_6",
+                  "NAD_0","NAD_1","NAD_2","NAD_3","NAD_4","NAD_5","NAD_6","MNAD")
+ndata <- NULL
+table_res<- NULL
+train <- NULL
+test <- NULL
+model <- NULL
+fmodel <- NULL
+full_model <- NULL
+bmodel <- NULL
+
+ndata$NCD <- rowSums(tdata[c(1:7)])
+ndata$AI <- rowSums(tdata[c(8:14)])
+ndata$AS_NA <- rowSums(tdata[c(15:21)])
+ndata$BL <- rowSums(tdata[c(22:28)])
+ndata$NAC <- rowSums(tdata[c(29:35)])
+ndata$AS_NAC <- rowSums(tdata[c(36:42)])
+ndata$CS <- rowSums(tdata[c(43:49)])
+ndata$AT <- rowSums(tdata[c(50:56)])
+ndata$NAO <- rowSums(tdata[c(57:63)])
+ndata$ADL <- rowSums(tdata[c(64:70)])
+ndata$NAD <- rowSums(tdata[c(71:77)])
+ndata$MNAD <- tdata$MNAD
+ndata <- data.frame(ndata)
+
+set.seed(100)
+ndata <- ndata[1:198373,]
+ndata <- scale(ndata)
+ndata <- data.frame(ndata)
+
+#split data
+smp_size <- floor(0.70 * nrow(ndata))
+train <- ndata[1:smp_size,]
+test <- ndata[smp_size+1:nrow(ndata),]
+
+```
+Let's take a look on the data.
+```{r}
+View(train)
+```
+
+## Multicollinearity Diagnostics
+
+#Correlation matrix
+```{r echo = FALSE}
+cor(train[-c(12)])
+```
+Most of the features are highly correlated.
+So,we need to eliminate features which donot add much variance to the data.
+For that,let's look at the VIF table as well.
+```{r echo = FALSE}
+library(usdm)
+vif(train[-c(12)])
+```
+An ideal VIF value is 1.
+So,any feature having vif value close to 1 is significant.
+A range of 1-5 for the VIF value is preferred.
+After 5, the feature is not considered significant.
+As we can see, our features lie nowhere near VIF value of 1.
+So,this suggests that our features are highly correlated.
+And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
+
+#PCA analysis
+For PCA,data needs to be:
+  scaled
+  all numeric
+  and without missing values
+
+# 138861 * 11
+```{r}
+features <- train[-c(12)]
+prin_comp <- prcomp(features,scale. = T)
+prin_comp$x[1:5,]
+dim(prin_comp$x)
+
+```
+Now,let’s plot the resultant principal components.
+```{r}
+biplot(prin_comp,scale = 0)
+```
+
+Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. 
+This is because, we want to retain as much information as possible using these 
+components. So, higher is the explained variance, higher will be the information 
+contained in those components.
+
+```{r}
+std_dev <- prin_comp$sdev
+pr_var <- std_dev^2
+prop_varex <- (pr_var/sum(pr_var))*100
+prop_varex
+
+```
+
+As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature.
+For more meaningful inference,we make a scree plot.
+A scree plot is used to access components or factors which explains the most of variability in the data.
+It represents values in descending order.
+```{r}
+plot(prop_varex, xlab = "Principal Component",
+     ylab = "Proportion of Variance Explained",
+     type = "b")
+```
+
+
+Here we can see that 6 components approximately 98% variance in the dataset.
+For the confirmation check,let's plot a cumulative variance plot.
+```{r}
+plot(cumsum(prop_varex), xlab = "Principal Component",
+     ylab = "Cumulative Proportion of Variance Explained",
+     type = "b")
+```
+
+The graph clearly shows that we should select 6 features which explains almost 98% of the data.
+Hence,we will choose 6 variables from PC1 to PC6 for our model and continue further.
+```{r}
+pca_data <- data.frame(prin_comp$x[,c(1:6)])
+pca_data$MNAD <- train$MNAD
+pca_data[1:5,]
+```
+Now,our training data looks like above.
+Let's do the correlation and VIF analysis on this.
+```{r}
+cor(pca_data[-c(7)])
+```
+```{r}
+vif(pca_data[-c(7)])
+```
+As we can see, VIF values are close to 1 and correlation matrix also shows that features are independent.
+Now, our features are scaled and independent.
+Let's apply a regression model now.
+
+##General multiple regression model
+
+```{r}
+model=lm(MNAD~.,pca_data)
+summary(model)
+```
+Here,we get an adjusted- R-square value of 0.8547 and all the features are significant as well.
+Now, our model seems good.
+But, we can still drop a variable to check if our model improves or not.
+For that,we can use methods of regression for propagating back-and-forth.
+
+## METHODS OF REGRESSION
+# 1.Forward Selection Method
+# 2.Backward Elimination Method
+# 3.Stepwise Method
+
+For our analysis,we have considered Backward elimination method.
+```{r}
+bmodel <- step(model, direction = "backward", trace=TRUE )
+bmodel
+
+```
+As we can see,no features are rejected in the steps of backward-elimination method.
+Thus,we can conclude that our model will include all of the 6 variables.
+Now,let's take a look at the coefficients and confidence intervals of the features.
+
+#Coefficients
+```{r echo=FALSE}
+coefficients(model) # model coefficients
+
+```
+#Confidence Intervals
+```{r echo=FALSE}
+confint(model) # CIs for model parameters
+
+```
+As we can see,all the coefficients lie in the confidence interval.
+
+Now,let's get to the prediction part.
