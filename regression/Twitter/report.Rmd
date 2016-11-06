@@ -1,6 +1,4 @@
----
-title: "Online Buzz Prediction on Twitter"
-output: github_document
+"Online Buzz Prediction on Twitter"
 ---
 
 ```{r include=FALSE}
@@ -44,7 +42,7 @@ ndata <- data.frame(ndata)
 #split data
 smp_size <- floor(0.70 * nrow(ndata))
 train <- ndata[1:smp_size,]
-test <- ndata[smp_size+1:nrow(ndata),]
+test <- ndata[(1+smp_size):(nrow(ndata)),]
 
 ```
 Let's take a look on the data.
@@ -59,6 +57,11 @@ train[1:5,]
 cor(train[-c(12)])
 ```
 Most of the features are highly correlated.
+We can see that these features have a lot of common information.
+-NCD AI AS_NA NAC AS_NAC NAO NAD
+-CS BL
+-AT ADL
+
 So,we need to eliminate features which donot add much variance to the data.
 For that,let's look at the VIF table as well.
 ```{r include=FALSE}
@@ -73,6 +76,7 @@ So,any feature having vif value close to 1 is significant.
 A range of 1-5 for the VIF value is preferred.
 After 5, the feature is not considered significant.
 As we can see, our features lie nowhere near VIF value of 1.
+
 So,this suggests that our features are highly correlated.
 And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
 
@@ -93,6 +97,10 @@ Now,let’s plot the resultant principal components.
 ```{r}
 biplot(prin_comp,scale = 0)
 ```
+We can see that PC1 and PC2 both come from some features which are marked red.
+ i.e. PC1 = a1x1 + a2x2 + a3x3 (say)
+ and  PC2 = b1x4 + b2x5 + b3x6 (say)
+Basically,PCA's are the resulatant of the correlated features.
 
 Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. 
 This is because, we want to retain as much information as possible using these 
@@ -184,3 +192,72 @@ confint(model) # CIs for model parameters
 As we can see,all the coefficients lie in the confidence interval.
 
 Now,let's get to the prediction part.
+For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions.
+Also,we should not combine the training and test set as we donot want our test set to be used in model building.
+What we can do is use predict function as shown below.
+```{r}
+pc_data_test <- predict(prin_comp,test[-c(12)])
+pc_data_test <- as.data.frame(pc_data_test)
+pc_data_test <- pc_data_test[c(1:6)]
+pc_data_test[1:5,]
+
+```
+Now,let's predict on the above dataset.
+```{r}
+pc_data_test$predicted_MNAD <- predict(model,pc_data_test)
+pc_data_test$MNAD <- test$MNAD
+pc_data_test$residuals <- pc_data_test$MNAD-pc_data_test$predicted_MNAD
+pc_data_test[1:5,7:9]
+```
+We can see that residuals are very less which explains the accuracy of our model.
+But,we have to do residual analysis for more accurate results.
+Let's calculate the variance of residuals.
+```{r}
+Se_sq <- sum((pc_data_test$residuals)^2)
+n <- nrow(test)
+p <- 7
+var_res <- Se_sq/(n-p)
+std_res <- sqrt(var_res)
+std_res
+```
+Now,let's do Standardized Residual Analysis.
+```{r}
+pc_data_test$stand_residuals <- pc_data_test$residuals/std_res
+mean(pc_data_test$stand_residuals)
+var(pc_data_test$stand_residuals)
+```
+We can see that mean is close to 0 and variance is close to 1.
+Let's plot them.
+```{r}
+plot(pc_data_test$stand_residuals,main = 'Standardized Residuals plot',
+     xlab='Observation no.',ylab = 'residuals')
+abline(h=5,untf = FALSE)
+abline(h=-5,untf = FALSE)
+```
+
+Now,we can say that a large standaradized residual(>5,say) potentially indicates an outlier.
+```{r}
+qqnorm(pc_data_test$stand_residuals,
+         ylab="Residuals",
+         xlab="Normal Scores",main="Normal Q-Q plot") 
+qqline(pc_data_test$stand_residuals)
+
+```
+
+Now,let's plot normal probability plot.
+```{r}
+y <- (as.numeric(rownames(pc_data_test))-0.5)/nrow(pc_data_test)
+x <- sort(pc_data_test$stand_residuals,decreasing = FALSE)
+plot(x,y,
+     xlab = 'Standardized residuals',
+     ylab = 'Probability')
+```
+This plot is not ideal as it contains a lot of outliers.
+Let's take a closer look.
+```{r}
+plot(x,y,
+     xlab = 'Standardized residuals',
+     ylab = 'Probability',
+     xlim = c(-1,1))
+```
+This suggests a light-tailed distribution.

@@ -42,7 +42,9 @@ View(ndata)
 #split data
 smp_size <- floor(0.70 * nrow(ndata))
 train <- ndata[1:smp_size,]
-test <- ndata[smp_size+1:nrow(ndata),]
+nrow(train)
+nrow(ndata)
+test <- ndata[(1+smp_size):(nrow(ndata)),]
 
 #Multicollinearity test
 cor(train[-c(12)])
@@ -112,8 +114,25 @@ pc_data_test$predicted_MNAD <- predict(model,pc_data_test)
 pc_data_test$MNAD <- test$MNAD
 pc_data_test$res <- pc_data_test$MNAD-pc_data_test$predicted_MNAD
 View(pc_data_test)
+
+Se_sq <- sum((pc_data_test$residuals)^2)
+n <- nrow(test)
+p <- 7
+var_res <- Se_sq/(n-p)
+std_res <- sqrt(var_res)
+std_res
+#Standaradized residual analysis.
+pc_data_test$stand_residuals <- pc_data_test$residuals/std_res
+
 plot(pc_data_test$res,main = 'Residuals plot',
      xlab='Observation no.',ylab = 'residuals')
+
+qqnorm(pc_data_test$residuals,
+         ylab="Residuals",
+         xlab="Normal Scores",main="Normal probability plot") 
+qqline(pc_data_test$residuals)
+
+length(pc_data_test$residuals[is.na(pc_data_test$residuals)])
 
 plot(model)
 confint(bmodel, level=0.95) # CIs for model parameters
