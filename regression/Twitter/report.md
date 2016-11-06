@@ -47,7 +47,9 @@ Correlation matrix
     ## ADL    0.1616723 0.97603134 0.009599617 1.000000000 0.003393779
     ## NAD    0.1160684 0.01213660 0.949212146 0.003393779 1.000000000
 
-Most of the features are highly correlated. So,we need to eliminate features which donot add much variance to the data. For that,let's look at the VIF table as well.
+Most of the features are highly correlated. We can see that these features have a lot of common information. -NCD AI AS\_NA NAC AS\_NAC NAO NAD -CS BL -AT ADL
+
+So,we need to eliminate features which donot add much variance to the data. For that,let's look at the VIF table as well.
 
     ##    Variables          VIF
     ## 1        NCD 9.400885e+05
@@ -62,7 +64,9 @@ Most of the features are highly correlated. So,we need to eliminate features whi
     ## 10       ADL 1.821024e+01
     ## 11       NAD 1.001314e+06
 
-An ideal VIF value is 1. So,any feature having vif value close to 1 is significant. A range of 1-5 for the VIF value is preferred. After 5, the feature is not considered significant. As we can see, our features lie nowhere near VIF value of 1. So,this suggests that our features are highly correlated. And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
+An ideal VIF value is 1. So,any feature having vif value close to 1 is significant. A range of 1-5 for the VIF value is preferred. After 5, the feature is not considered significant. As we can see, our features lie nowhere near VIF value of 1.
+
+So,this suggests that our features are highly correlated. And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
 
 PCA analysis
 ============
@@ -100,7 +104,7 @@ Now,let’s plot the resultant principal components.
 biplot(prin_comp,scale = 0)
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](report_files/figure-markdown_github/unnamed-chunk-7-1.png) We can see that PC1 and PC2 both come from some features which are marked red. i.e. PC1 = a1x1 + a2x2 + a3x3 (say) and PC2 = b1x4 + b2x5 + b3x6 (say) Basically,PCA's are the resulatant of the correlated features.
 
 Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. This is because, we want to retain as much information as possible using these components. So, higher is the explained variance, higher will be the information contained in those components.
 
@@ -286,4 +290,111 @@ Confidence Intervals
 
 As we can see,all the coefficients lie in the confidence interval.
 
-Now,let's get to the prediction part.
+Now,let's get to the prediction part. For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions. Also,we should not combine the training and test set as we donot want our test set to be used in model building. What we can do is use predict function as shown below.
+
+``` r
+pc_data_test <- predict(prin_comp,test[-c(12)])
+pc_data_test <- as.data.frame(pc_data_test)
+pc_data_test <- pc_data_test[c(1:6)]
+pc_data_test[1:5,]
+```
+
+    ##               PC1       PC2      PC3          PC4          PC5
+    ## 138862 -0.9242058 -1.743193 4.503665  0.041880943  0.032483780
+    ## 138863 -1.1546048  2.941014 1.882318 -0.006670066 -0.003252062
+    ## 138864 -1.1546048  2.941014 1.882318 -0.006670066 -0.003252062
+    ## 138865 -1.3027098  4.060876 2.707984 -0.015703194 -0.023869805
+    ## 138866 -1.1587390  2.940685 1.882066 -0.005417740 -0.002812011
+    ##                  PC6
+    ## 138862  0.0115703087
+    ## 138863  0.0012153638
+    ## 138864  0.0012153638
+    ## 138865 -0.0006873007
+    ## 138866  0.0008238042
+
+Now,let's predict on the above dataset.
+
+``` r
+pc_data_test$predicted_MNAD <- predict(model,pc_data_test)
+pc_data_test$MNAD <- test$MNAD
+pc_data_test$residuals <- pc_data_test$MNAD-pc_data_test$predicted_MNAD
+pc_data_test[1:5,7:9]
+```
+
+    ##        predicted_MNAD       MNAD    residuals
+    ## 138862     -0.2674591 -0.2708395 -0.003380369
+    ## 138863     -0.2669284 -0.2708395 -0.003911097
+    ## 138864     -0.2669284 -0.2701534 -0.003225066
+    ## 138865     -0.2643190 -0.2701534 -0.005834383
+    ## 138866     -0.2680943 -0.2701534 -0.002059159
+
+We can see that residuals are very less which explains the accuracy of our model. But,we have to do residual analysis for more accurate results. Let's calculate the variance of residuals.
+
+``` r
+Se_sq <- sum((pc_data_test$residuals)^2)
+n <- nrow(test)
+p <- 7
+var_res <- Se_sq/(n-p)
+std_res <- sqrt(var_res)
+std_res
+```
+
+    ## [1] 0.2261814
+
+Now,let's do Standardized Residual Analysis.
+
+``` r
+pc_data_test$stand_residuals <- pc_data_test$residuals/std_res
+mean(pc_data_test$stand_residuals)
+```
+
+    ## [1] 0.005919984
+
+``` r
+var(pc_data_test$stand_residuals)
+```
+
+    ## [1] 0.9998641
+
+We can see that mean is close to 0 and variance is close to 1. Let's plot them.
+
+``` r
+plot(pc_data_test$stand_residuals,main = 'Standardized Residuals plot',
+     xlab='Observation no.',ylab = 'residuals')
+abline(h=5,untf = FALSE)
+abline(h=-5,untf = FALSE)
+```
+
+![](report_files/figure-markdown_github/unnamed-chunk-22-1.png)
+
+Now,we can say that a large standaradized residual(&gt;5,say) potentially indicates an outlier.
+
+``` r
+qqnorm(pc_data_test$stand_residuals,
+         ylab="Residuals",
+         xlab="Normal Scores",main="Normal Q-Q plot") 
+qqline(pc_data_test$stand_residuals)
+```
+
+![](report_files/figure-markdown_github/unnamed-chunk-23-1.png)
+
+Now,let's plot normal probability plot.
+
+``` r
+y <- (as.numeric(rownames(pc_data_test))-0.5)/nrow(pc_data_test)
+x <- sort(pc_data_test$stand_residuals,decreasing = FALSE)
+plot(x,y,
+     xlab = 'Standardized residuals',
+     ylab = 'Probability')
+```
+
+![](report_files/figure-markdown_github/unnamed-chunk-24-1.png) This plot is not ideal as it contains a lot of outliers. Let's take a closer look.
+
+``` r
+plot(x,y,
+     xlab = 'Standardized residuals',
+     ylab = 'Probability',
+     xlim = c(-1,1))
+```
+
+![](report_files/figure-markdown_github/unnamed-chunk-25-1.png) This suggests a light-tailed distribution.

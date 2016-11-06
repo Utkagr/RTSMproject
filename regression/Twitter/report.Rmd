@@ -1,6 +1,7 @@
-"Online Buzz Prediction on Twitter"
 ---
-
+title: Online Buzz Prediction on Twitter
+output: github_document
+---
 ```{r include=FALSE}
 tdata <- read.csv("/home/utkarsh/rtsm/regression/Twitter/Twitter.data")
 names(tdata) <- c("NCD_0","NCD_1","NCD_2","NCD_3","NCD_4","NCD_5","NCD_6",
