@@ -46,10 +46,10 @@ Correlation matrix
     ## NAO    0.1276590 0.01857014 1.000000000 0.009599617 0.949212146
     ## ADL    0.1616723 0.97603134 0.009599617 1.000000000 0.003393779
     ## NAD    0.1160684 0.01213660 0.949212146 0.003393779 1.000000000
-
-Most of the features are highly correlated. We can see that these features have a lot of common information.
--NCD AI AS_NA NAC AS_NAC NAO NAD 
--CS BL 
+\
+Most of the features are highly correlated. We can see that these features have a lot of common information.\
+-NCD AI AS_NA NAC AS_NAC NAO NAD \
+-CS BL \
 -AT ADL
 
 So,we need to eliminate features which donot add much variance to the data. For that,let's look at the VIF table as well.
