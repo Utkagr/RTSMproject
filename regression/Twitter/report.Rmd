@@ -1,6 +1,8 @@
 ---
 title: "Online Buzz Prediction on Twitter"
-output: github_document
+output:
+  word_document: default
+  pdf_document: default
 graphics: yes
 ---
 ```{r include=FALSE}
