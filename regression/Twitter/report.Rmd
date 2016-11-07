@@ -1,9 +1,6 @@
 ---
 title: "Online Buzz Prediction on Twitter"
-output:
-  word_document: default
-  pdf_document: default
-graphics: yes
+output: github_document
 ---
 ```{r include=FALSE}
 tdata <- read.csv("/home/utkarsh/rtsm/regression/Twitter/Twitter.data")

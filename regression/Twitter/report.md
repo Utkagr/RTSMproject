@@ -46,11 +46,8 @@ Correlation matrix
     ## NAO    0.1276590 0.01857014 1.000000000 0.009599617 0.949212146
     ## ADL    0.1616723 0.97603134 0.009599617 1.000000000 0.003393779
     ## NAD    0.1160684 0.01213660 0.949212146 0.003393779 1.000000000
-\
-Most of the features are highly correlated. We can see that these features have a lot of common information.\
--NCD AI AS_NA NAC AS_NAC NAO NAD \
--CS BL \
--AT ADL
+
+Most of the features are highly correlated. We can see that these features have a lot of common information. -NCD AI AS\_NA NAC AS\_NAC NAO NAD -CS BL -AT ADL
 
 So,we need to eliminate features which donot add much variance to the data. For that,let's look at the VIF table as well.
 
@@ -107,11 +104,7 @@ Now,let’s plot the resultant principal components.
 biplot(prin_comp,scale = 0)
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-7-1.png) 
-We can see that PC1 and PC2 both come from some features which are marked red.
-i.e. PC1 = a1x1 + a2x2 + a3x3 (say) and 
-PC2 = b1x4 + b2x5 + b3x6 (say) 
-Basically,PCA's are the resulatant of the correlated features.
+![](report_files/figure-markdown_github/unnamed-chunk-7-1.png) We can see that PC1 and PC2 both come from some features which are marked red. i.e. PC1 = a1x1 + a2x2 + a3x3 (say) and PC2 = b1x4 + b2x5 + b3x6 (say) Basically,PCA's are the resulatant of the correlated features.
 
 Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. This is because, we want to retain as much information as possible using these components. So, higher is the explained variance, higher will be the information contained in those components.
 
@@ -126,9 +119,7 @@ prop_varex
     ##  [6] 2.895581e-01 2.212197e-01 5.170297e-02 4.098495e-02 1.173542e-02
     ## [11] 5.106242e-06
 
-As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature. 
-For more meaningful inference,we make a scree plot. 
-A scree plot is used to access components or factors which explains the most of variability in the data. It represents values in descending order.
+As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature. For more meaningful inference,we make a scree plot. A scree plot is used to access components or factors which explains the most of variability in the data. It represents values in descending order.
 
 ``` r
 plot(prop_varex, xlab = "Principal Component",
@@ -241,9 +232,7 @@ Here,we get an adjusted- R-square value of 0.8547 and all the features are signi
 METHODS OF REGRESSION
 =====================
 
-1.Forward Selection Method 
-2.Backward Elimination Method 
-3.Stepwise Method
+1.Forward Selection Method 2.Backward Elimination Method 3.Stepwise Method
 
 For our analysis,we have considered Backward elimination method.
 
