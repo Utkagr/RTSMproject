@@ -253,18 +253,32 @@ bmodel <- step(model, direction = "backward", trace=TRUE )
     ## - PC1   1    140075 164947   23917
 
 ``` r
-bmodel
+summary(bmodel)
 ```
 
     ## 
     ## Call:
     ## lm(formula = MNAD ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6, data = pca_data)
     ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -42.059  -0.011   0.003   0.012  70.624 
+    ## 
     ## Coefficients:
-    ## (Intercept)          PC1          PC2          PC3          PC4  
-    ##     0.01413      0.39148      0.04094      0.02838      0.32418  
-    ##         PC5          PC6  
-    ##     0.26756      0.12913
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept) 0.0141252  0.0011358   12.44   <2e-16 ***
+    ## PC1         0.3914790  0.0004427  884.31   <2e-16 ***
+    ## PC2         0.0409386  0.0007572   54.06   <2e-16 ***
+    ## PC3         0.0283823  0.0008779   32.33   <2e-16 ***
+    ## PC4         0.3241814  0.0022748  142.51   <2e-16 ***
+    ## PC5         0.2675612  0.0026941   99.31   <2e-16 ***
+    ## PC6         0.1291322  0.0063639   20.29   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4232 on 138854 degrees of freedom
+    ## Multiple R-squared:  0.8547, Adjusted R-squared:  0.8547 
+    ## F-statistic: 1.361e+05 on 6 and 138854 DF,  p-value: < 2.2e-16
 
 As we can see,no features are rejected in the steps of backward-elimination method. Thus,we can conclude that our model will include all of the 6 variables. Now,let's take a look at the coefficients and confidence intervals of the features.
 
@@ -289,6 +303,8 @@ Confidence Intervals
     ## PC6         0.11665900 0.14160531
 
 As we can see,all the coefficients lie in the confidence interval.
+
+Hence,our equation is \# MNAD = 0.39147901*PC1 + 0.04093860 * PC2 + 0.02838228 \* PC3 + 0.32418139 \* PC4 + 0.26756121 \* PC5 + 0.12913215 \* PC6 + 0.01412517
 
 Now,let's get to the prediction part. For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions. Also,we should not combine the training and test set as we donot want our test set to be used in model building. What we can do is use predict function as shown below.
 
