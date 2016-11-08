@@ -319,8 +319,7 @@ Confidence Intervals
 As we can see,all the coefficients lie in the confidence interval.
 
 Hence,our equation is <br />
-# MNAD = 0.39147901*PC1 + 0.04093860 * PC2 + 0.02838228 * PC3 + 0.32418139 * PC4 + 0.26756121 * PC5 + 0.12913215 * PC6+
-0.01412517
+## MNAD = 0.39147901*PC1 + 0.04093860*PC2 + 0.02838228*PC3 + 0.32418139*PC4 + 0.26756121*PC5 + 0.12913215*PC6+0.01412517
 
 Now,let's get to the prediction part. For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions. Also,we should not combine the training and test set as we donot want our test set to be used in model building. What we can do is use predict function as shown below.
 
