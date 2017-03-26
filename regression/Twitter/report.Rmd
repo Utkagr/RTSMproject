@@ -137,6 +137,7 @@ The 3 rectangles in the plot mark the territory of highly correlated features me
 -NCD AI AS_NA NAC AS_NAC NAO NAD <br>
 -CS BL<br>
 -AT ADL<br>
+
 We can also take a look at the VIF values.
 ```{r include=FALSE}
 library(usdm)
@@ -153,12 +154,14 @@ As we can see, our features lie nowhere near VIF value of 1.<br>
 This suggests that our features are highly correlated as we have seen in earlier plot as 
 well.<br>
 So,we need to eliminate features which donot add much variance to the data.<br>
-For that, let's do principal component analysis which projects the features into the direction of maximum variance.<br>
+For that, let's do principal component analysis which projects the features into the direction of maximum variance.
+
 #PCA analysis
+
 For PCA,data needs to be:<br>
-  - scaled
-  - all numeric
-  - no missing values
+  - scaled <br>
+  - all numeric <br>
+  - no missing values <br>
 
 ```{r}
 features <- train[-c(12)]

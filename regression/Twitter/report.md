@@ -126,7 +126,9 @@ corrplot(m,order = "hclust",addrect=3)
 
 ![](report_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
-We can infer from the above plot that most of the features are highly correlated.<br> The 3 rectangles in the plot mark the territory of highly correlated features mentioned below.<br> -NCD AI AS\_NA NAC AS\_NAC NAO NAD <br> -CS BL<br> -AT ADL<br> We can also take a look at the VIF values.
+We can infer from the above plot that most of the features are highly correlated.<br> The 3 rectangles in the plot mark the territory of highly correlated features mentioned below.<br> -NCD AI AS\_NA NAC AS\_NAC NAO NAD <br> -CS BL<br> -AT ADL<br>
+
+We can also take a look at the VIF values.
 
     ##    Variables          VIF
     ## 1        NCD 9.400885e+05
@@ -141,7 +143,12 @@ We can infer from the above plot that most of the features are highly correlated
     ## 10       ADL 1.821024e+01
     ## 11       NAD 1.001314e+06
 
-An ideal VIF value is 1.<br> So,any feature having vif value close to 1 is significant.<br> A range of 1-5 for the VIF value is preferred.<br> After 5, the feature is not considered significant.<br> As we can see, our features lie nowhere near VIF value of 1.<br> This suggests that our features are highly correlated as we have seen in earlier plot as well.<br> So,we need to eliminate features which donot add much variance to the data.<br> For that, let's do principal component analysis which projects the features into the direction of maximum variance.<br> \#PCA analysis For PCA,data needs to be:<br> - scaled - all numeric - no missing values
+An ideal VIF value is 1.<br> So,any feature having vif value close to 1 is significant.<br> A range of 1-5 for the VIF value is preferred.<br> After 5, the feature is not considered significant.<br> As we can see, our features lie nowhere near VIF value of 1.<br> This suggests that our features are highly correlated as we have seen in earlier plot as well.<br> So,we need to eliminate features which donot add much variance to the data.<br> For that, let's do principal component analysis which projects the features into the direction of maximum variance.
+
+PCA analysis
+============
+
+For PCA,data needs to be:<br> - scaled <br> - all numeric <br> - no missing values <br>
 
 ``` r
 features <- train[-c(12)]
