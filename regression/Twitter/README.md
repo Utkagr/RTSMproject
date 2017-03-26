@@ -16,6 +16,75 @@ Let's take a look on the data.
     ## 4 -2.509767 -0.5579229 -0.3289477 -0.5762051 -0.2970117 -0.2701534
     ## 5 -2.509767 -0.5579229 -0.3289477 -0.5762051 -0.2970117 -0.2694674
 
+Attributes
+----------
+
+    -- Number of Created Discussions (NCD)
+
+       -- Type : Numeric, integers only 
+       -- Description : This feature measures the number of discussions created 
+          at time step t and involving the instance's topic.
+
+    -- Author Increase (AI)
+
+       -- Type : Numeric, integers only 
+       -- Description : This featurethe number of new authors interacting on
+          the instance's topic at time t (i.e. its popularity)
+
+    -- Attention Level (measured with number of authors) (AS(NA)) 
+
+       -- Type : Numeric, real in [0,1]
+       -- Description : This feature is a measure of the attention payed to a 
+          the instance's topic on a social media.
+       
+    -- Burstiness Level (BL) (columns [21,27])
+
+       -- Type : Numeric, defined on [0,1] 
+       -- Description : The burstiness level for a topic z at a time t is 
+          defined as the ratio of ncd and nad
+          
+    -- Number of Atomic Containers (NAC)
+
+       -- Type : Numeric, integer
+       -- Description : This feature measures the total number of atomic 
+          containers generated through the whole social media on the instance's topic until time t.
+
+    -- Attention Level (measured with number of contributions) (AS(NAC)) 
+
+       -- Type : Numeric, real in [0,1]
+       -- Description : This feature is a measure of the attention payed to a 
+          the instance's topic on a social media.
+
+    -- Contribution Sparseness (CS)
+
+       -- Type : Numeric, real in [0,1] 
+       -- Description : This feature is a measure of spreading of contributions
+          over discussion for the instance's topic at time t.
+          
+    -- Author Interaction (AT)
+
+       -- Type : Numeric, integer.
+       -- Description : This feature measures the average number of authors
+          interacting on the instance's topic within a discussion.
+
+    -- Number of Authors (NA)
+
+       -- Type : Numeric, integer.
+       -- Description : This feature measures the number of authors interacting
+          on the instance's topic at time t.
+          
+    -- Average Discussions Length (ADL)
+
+       -- Type : Numeric, real.
+       -- Description : This feature directly measures the average length of a 
+          discussion belonging to the instance's topic.
+
+    -- Average Discussions Length (NAD)
+
+       -- Type : Numeric, integer.
+       -- Description : This features measures the number of discussions
+          involving the instance's topic until time t.
+
 Multicollinearity Diagnostics
 -----------------------------
 
@@ -47,12 +116,19 @@ Correlation matrix
     ## ADL    0.1616723 0.97603134 0.009599617 1.000000000 0.003393779
     ## NAD    0.1160684 0.01213660 0.949212146 0.003393779 1.000000000
 
-Most of the features are highly correlated. We can see that these features have a lot of common information. <br />
--NCD AI AS_NA NAC AS_NAC NAO NAD <br />
--CS BL <br />
--AT ADL<br />
+Let's take a look at the correlation plots for better understanding of the data.
 
-So,we need to eliminate features which donot add much variance to the data. For that,let's look at the VIF table as well.
+``` r
+library(corrplot)
+m <- cor(train[-c(12)])
+corrplot(m,order = "hclust",addrect=3)
+```
+
+![](report_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+We can infer from the above plot that most of the features are highly correlated.<br> The 3 rectangles in the plot mark the territory of highly correlated features mentioned below.<br> -NCD AI AS\_NA NAC AS\_NAC NAO NAD <br> -CS BL<br> -AT ADL<br>
+
+We can also take a look at the VIF values.
 
     ##    Variables          VIF
     ## 1        NCD 9.400885e+05
@@ -67,14 +143,12 @@ So,we need to eliminate features which donot add much variance to the data. For 
     ## 10       ADL 1.821024e+01
     ## 11       NAD 1.001314e+06
 
-An ideal VIF value is 1. So,any feature having vif value close to 1 is significant. A range of 1-5 for the VIF value is preferred. After 5, the feature is not considered significant. As we can see, our features lie nowhere near VIF value of 1.<br />
-
-So,this suggests that our features are highly correlated. And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
+An ideal VIF value is 1.<br> So,any feature having vif value close to 1 is significant.<br> A range of 1-5 for the VIF value is preferred.<br> After 5, the feature is not considered significant.<br> As we can see, our features lie nowhere near VIF value of 1.<br> This suggests that our features are highly correlated as we have seen in earlier plot as well.<br> So,we need to eliminate features which donot add much variance to the data.<br> For that, let's do principal component analysis which projects the features into the direction of maximum variance.
 
 PCA analysis
 ============
 
-For PCA,data needs to be: scaled all numeric and without missing values
+For PCA,data needs to be:<br> - scaled <br> - all numeric <br> - no missing values <br>
 
 ``` r
 features <- train[-c(12)]
@@ -107,13 +181,9 @@ Now,let’s plot the resultant principal components.
 biplot(prin_comp,scale = 0)
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-7-1.png) <br />
-We can see that PC1 and PC2 both come from some features which are marked red.<br />
-i.e. PC1 = a1x1 + a2x2 + a3x3 (say) and <br />
-     PC2 = b1x4 + b2x5 + b3x6 (say)
-<br />Basically,PCA's are the resulatant of the correlated features.
+![](report_files/figure-markdown_github/unnamed-chunk-8-1.png) We can see that PC1 and PC2 both come from some features which are marked red.<br> i.e. PC1 = a1x1 + a2x2 + a3x3 (say)<br> and PC2 = b1x4 + b2x5 + b3x6 (say)<br> Basically,PCA's are the resulatant of the correlated features.
 
-Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. This is because, we want to retain as much information as possible using these components. So, higher is the explained variance, higher will be the information contained in those components.
+Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance.<br> This is because, we want to retain as much information as possible using these components.<br> So, higher is the explained variance, higher will be the information contained in those components.
 
 ``` r
 std_dev <- prin_comp$sdev
@@ -126,8 +196,7 @@ prop_varex
     ##  [6] 2.895581e-01 2.212197e-01 5.170297e-02 4.098495e-02 1.173542e-02
     ## [11] 5.106242e-06
 
-As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature. For more meaningful inference,we make a scree plot.<br />
-A scree plot is used to access components or factors which explains the most of variability in the data. It represents values in descending order.
+As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature.<br> For more meaningful inference,we make a scree plot.<br> A scree plot is used to access components or factors which explains the most of variability in the data.<br> It represents values in descending order.
 
 ``` r
 plot(prop_varex, xlab = "Principal Component",
@@ -135,9 +204,7 @@ plot(prop_varex, xlab = "Principal Component",
      type = "b")
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-9-1.png)
-
-Here we can see that 6 components approximately 98% variance in the dataset. For the confirmation check,let's plot a cumulative variance plot.
+![](report_files/figure-markdown_github/unnamed-chunk-10-1.png) Here we can see that 6 components approximately 98% variance in the dataset.<br> For the confirmation check,let's plot a cumulative variance plot.
 
 ``` r
 plot(cumsum(prop_varex), xlab = "Principal Component",
@@ -145,9 +212,9 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
      type = "b")
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](report_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
-The graph clearly shows that we should select 6 features which explains almost 98% of the data. Hence,we will choose 6 variables from PC1 to PC6 for our model and continue further.
+The graph clearly shows that we should select 6 features which explains almost 98% of the data.<br> Hence,we will choose 6 variables from PC1 to PC6 for our model and continue further.
 
 ``` r
 pca_data <- data.frame(prin_comp$x[,c(1:6)])
@@ -168,7 +235,7 @@ pca_data[1:5,]
     ## 4 -0.2701534
     ## 5 -0.2694674
 
-Now,our training data looks like above. Let's do the correlation and VIF analysis on this.
+Now,our training data looks like above.<br> Let's do the correlation and VIF analysis on this.
 
 ``` r
 cor(pca_data[-c(7)])
@@ -201,8 +268,7 @@ vif(pca_data[-c(7)])
     ## 5       PC5 1.163193
     ## 6       PC6 1.240137
 
-As we can see, VIF values are close to 1 and correlation matrix also shows that features are independent. Now, our features are scaled and independent. <br />
-Let's apply a regression model now.
+As we can see, VIF values are close to 1 and correlation matrix also shows that features are independent.<br> Now, our features are scaled and independent.<br> Let's apply a regression model now.
 
 General multiple regression model
 ---------------------------------
@@ -236,16 +302,12 @@ summary(model)
     ## Multiple R-squared:  0.8547, Adjusted R-squared:  0.8547 
     ## F-statistic: 1.361e+05 on 6 and 138854 DF,  p-value: < 2.2e-16
 
-Here,we get an adjusted- R-square value of 0.8547 and all the features are significant as well. Now, our model seems good.<br />
-But, we can still drop a variable to check if our model improves or not. <br />
-For that,we can use methods of regression for propagating back-and-forth.
+Here,we get an adjusted- R-square value of 0.8547 and all the features are significant as well.<br> Now, our model seems good.<br> But, we can still drop a variable to check if our model improves or not.<br> For that,we can use methods of regression for propagating back-and-forth.
 
 METHODS OF REGRESSION
 =====================
-<br />
-1.Forward Selection Method <br />
-2.Backward Elimination Method <br />
-3.Stepwise Method <br />
+
+1.Forward Selection Method<br> 2.Backward Elimination Method<br> 3.Stepwise Method
 
 For our analysis,we have considered Backward elimination method.
 
@@ -293,8 +355,7 @@ summary(bmodel)
     ## Multiple R-squared:  0.8547, Adjusted R-squared:  0.8547 
     ## F-statistic: 1.361e+05 on 6 and 138854 DF,  p-value: < 2.2e-16
 
-As we can see,no features are rejected in the steps of backward-elimination method. Thus,we can conclude that our model will include all of the 6 variables. <br />
-Now,let's take a look at the coefficients and confidence intervals of the features.
+As we can see,no features are rejected in the steps of backward-elimination method.<br> Thus,we can conclude that our model will include all of the 6 variables.<br> Now,let's take a look at the coefficients and confidence intervals of the features.
 
 Coefficients
 ============
@@ -318,10 +379,9 @@ Confidence Intervals
 
 As we can see,all the coefficients lie in the confidence interval.
 
-Hence,our equation is <br />
-## MNAD = 0.39147901*PC1 + 0.04093860*PC2 + 0.02838228*PC3 + 0.32418139*PC4 + 0.26756121*PC5 + 0.12913215*PC6+0.01412517
+Hence,our equation is \# MNAD = 0.39147901*PC1 + 0.04093860 * PC2 + 0.02838228 \* PC3 + 0.32418139 \* PC4 + 0.26756121 \* PC5 + 0.12913215 \* PC6 + 0.01412517
 
-Now,let's get to the prediction part. For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions. Also,we should not combine the training and test set as we donot want our test set to be used in model building. What we can do is use predict function as shown below.
+Now,let's get to the prediction part.<br> For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions.<br> Also,we should not combine the training and test set as we donot want our test set to be used in model building.<br> What we can do is use predict function as shown below.
 
 ``` r
 pc_data_test <- predict(prin_comp,test[-c(12)])
@@ -359,7 +419,7 @@ pc_data_test[1:5,7:9]
     ## 138865     -0.2643190 -0.2701534 -0.005834383
     ## 138866     -0.2680943 -0.2701534 -0.002059159
 
-We can see that residuals are very less which explains the accuracy of our model. But,we have to do residual analysis for more accurate results. Let's calculate the variance of residuals.
+We can see that residuals are very less which explains the accuracy of our model.<br> But,we have to do residual analysis for more accurate results.<br> Let's calculate the variance of residuals.
 
 ``` r
 Se_sq <- sum((pc_data_test$residuals)^2)
@@ -396,7 +456,7 @@ abline(h=5,untf = FALSE)
 abline(h=-5,untf = FALSE)
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![](report_files/figure-markdown_github/unnamed-chunk-23-1.png)
 
 Now,we can say that a large standaradized residual(&gt;5,say) potentially indicates an outlier.
 
@@ -407,7 +467,7 @@ qqnorm(pc_data_test$stand_residuals,
 qqline(pc_data_test$stand_residuals)
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-23-1.png)
+![](report_files/figure-markdown_github/unnamed-chunk-24-1.png)
 
 Now,let's plot normal probability plot.
 
@@ -419,8 +479,7 @@ plot(x,y,
      ylab = 'Probability')
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-24-1.png) <br />
-This plot is not ideal as it contains a lot of outliers. Let's take a closer look.
+![](report_files/figure-markdown_github/unnamed-chunk-25-1.png) This plot is not ideal as it contains a lot of outliers.<br> Let's take a closer look.
 
 ``` r
 plot(x,y,
@@ -429,5 +488,4 @@ plot(x,y,
      xlim = c(-1,1))
 ```
 
-![](report_files/figure-markdown_github/unnamed-chunk-25-1.png) <br />
-This suggests a light-tailed distribution.
+![](report_files/figure-markdown_github/unnamed-chunk-26-1.png) This suggests a light-tailed distribution.
