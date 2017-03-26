@@ -50,6 +50,73 @@ Let's take a look on the data.
 ```{r echo=FALSE}
 train[1:5,]
 ```
+## Attributes
+
+    -- Number of Created Discussions (NCD)
+
+       -- Type : Numeric, integers only 
+       -- Description : This feature measures the number of discussions created 
+          at time step t and involving the instance's topic.
+
+    -- Author Increase (AI)
+
+       -- Type : Numeric, integers only 
+       -- Description : This featurethe number of new authors interacting on
+          the instance's topic at time t (i.e. its popularity)
+    
+    -- Attention Level (measured with number of authors) (AS(NA)) 
+    
+       -- Type : Numeric, real in [0,1]
+       -- Description : This feature is a measure of the attention payed to a 
+          the instance's topic on a social media.
+       
+    -- Burstiness Level (BL) (columns [21,27])
+
+       -- Type : Numeric, defined on [0,1] 
+       -- Description : The burstiness level for a topic z at a time t is 
+          defined as the ratio of ncd and nad
+          
+    -- Number of Atomic Containers (NAC)
+
+       -- Type : Numeric, integer
+       -- Description : This feature measures the total number of atomic 
+          containers generated through the whole social media on the instance's topic until time t.
+
+    -- Attention Level (measured with number of contributions) (AS(NAC)) 
+
+       -- Type : Numeric, real in [0,1]
+       -- Description : This feature is a measure of the attention payed to a 
+          the instance's topic on a social media.
+
+    -- Contribution Sparseness (CS)
+
+       -- Type : Numeric, real in [0,1] 
+       -- Description : This feature is a measure of spreading of contributions
+          over discussion for the instance's topic at time t.
+          
+    -- Author Interaction (AT)
+
+       -- Type : Numeric, integer.
+       -- Description : This feature measures the average number of authors
+          interacting on the instance's topic within a discussion.
+
+    -- Number of Authors (NA)
+
+       -- Type : Numeric, integer.
+       -- Description : This feature measures the number of authors interacting
+          on the instance's topic at time t.
+          
+    -- Average Discussions Length (ADL)
+
+       -- Type : Numeric, real.
+       -- Description : This feature directly measures the average length of a 
+          discussion belonging to the instance's topic.
+
+    -- Average Discussions Length (NAD)
+
+       -- Type : Numeric, integer.
+       -- Description : This features measures the number of discussions
+          involving the instance's topic until time t.
 
 ## Multicollinearity Diagnostics
 
@@ -57,14 +124,20 @@ train[1:5,]
 ```{r echo = FALSE}
 cor(train[-c(12)])
 ```
-Most of the features are highly correlated.
-We can see that these features have a lot of common information.
--NCD AI AS_NA NAC AS_NAC NAO NAD
--CS BL
--AT ADL
+Let's take a look at the correlation plots for better understanding of the data.
 
-So,we need to eliminate features which donot add much variance to the data.
-For that,let's look at the VIF table as well.
+```{r}
+library(corrplot)
+m <- cor(train[-c(12)])
+corrplot(m,order = "hclust",addrect=3)
+```
+
+We can infer from the above plot that most of the features are highly correlated.<br>
+The 3 rectangles in the plot mark the territory of highly correlated features mentioned below.<br>
+-NCD AI AS_NA NAC AS_NAC NAO NAD <br>
+-CS BL<br>
+-AT ADL<br>
+We can also take a look at the VIF values.
 ```{r include=FALSE}
 library(usdm)
 ```
@@ -72,20 +145,20 @@ library(usdm)
 ```{r echo = FALSE}
 vif(train[-c(12)])
 ```
-An ideal VIF value is 1.
-So,any feature having vif value close to 1 is significant.
-A range of 1-5 for the VIF value is preferred.
-After 5, the feature is not considered significant.
-As we can see, our features lie nowhere near VIF value of 1.
-
-So,this suggests that our features are highly correlated.
-And hence,we would have to run Principal Component Analysis on our data because neither correlation table nor VIF analysis is sufficient to differentiate between significant and insignificant features.
-
+An ideal VIF value is 1.<br>
+So,any feature having vif value close to 1 is significant.<br>
+A range of 1-5 for the VIF value is preferred.<br>
+After 5, the feature is not considered significant.<br>
+As we can see, our features lie nowhere near VIF value of 1.<br>
+This suggests that our features are highly correlated as we have seen in earlier plot as 
+well.<br>
+So,we need to eliminate features which donot add much variance to the data.<br>
+For that, let's do principal component analysis which projects the features into the direction of maximum variance.<br>
 #PCA analysis
-For PCA,data needs to be:
-  scaled
-  all numeric
-  and without missing values
+For PCA,data needs to be:<br>
+  - scaled
+  - all numeric
+  - no missing values
 
 ```{r}
 features <- train[-c(12)]
@@ -98,14 +171,15 @@ Now,let’s plot the resultant principal components.
 ```{r}
 biplot(prin_comp,scale = 0)
 ```
-We can see that PC1 and PC2 both come from some features which are marked red.
- i.e. PC1 = a1x1 + a2x2 + a3x3 (say)
- and  PC2 = b1x4 + b2x5 + b3x6 (say)
+We can see that PC1 and PC2 both come from some features which are marked red.<br>
+ i.e. PC1 = a1x1 + a2x2 + a3x3 (say)<br>
+ and  PC2 = b1x4 + b2x5 + b3x6 (say)<br>
 Basically,PCA's are the resulatant of the correlated features.
 
-Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance. 
+Now,let's calculate the variance contribution of every principal component as we aim to find the components which explain the maximum variance.<br>
 This is because, we want to retain as much information as possible using these 
-components. So, higher is the explained variance, higher will be the information 
+components.<br>
+So, higher is the explained variance, higher will be the information 
 contained in those components.
 
 ```{r}
@@ -115,19 +189,16 @@ prop_varex <- (pr_var/sum(pr_var))*100
 prop_varex
 
 ```
-
-As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature.
-For more meaningful inference,we make a scree plot.
-A scree plot is used to access components or factors which explains the most of variability in the data.
+As we can see,PCA1 contributes app. 59% of the variance and hence is the most important feature.<br>
+For more meaningful inference,we make a scree plot.<br>
+A scree plot is used to access components or factors which explains the most of variability in the data.<br>
 It represents values in descending order.
 ```{r}
 plot(prop_varex, xlab = "Principal Component",
      ylab = "Proportion of Variance Explained",
      type = "b")
 ```
-
-
-Here we can see that 6 components approximately 98% variance in the dataset.
+Here we can see that 6 components approximately 98% variance in the dataset.<br>
 For the confirmation check,let's plot a cumulative variance plot.
 ```{r}
 plot(cumsum(prop_varex), xlab = "Principal Component",
@@ -135,14 +206,14 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
      type = "b")
 ```
 
-The graph clearly shows that we should select 6 features which explains almost 98% of the data.
+The graph clearly shows that we should select 6 features which explains almost 98% of the data.<br>
 Hence,we will choose 6 variables from PC1 to PC6 for our model and continue further.
 ```{r}
 pca_data <- data.frame(prin_comp$x[,c(1:6)])
 pca_data$MNAD <- train$MNAD
 pca_data[1:5,]
 ```
-Now,our training data looks like above.
+Now,our training data looks like above.<br>
 Let's do the correlation and VIF analysis on this.
 ```{r}
 cor(pca_data[-c(7)])
@@ -150,8 +221,8 @@ cor(pca_data[-c(7)])
 ```{r}
 vif(pca_data[-c(7)])
 ```
-As we can see, VIF values are close to 1 and correlation matrix also shows that features are independent.
-Now, our features are scaled and independent.
+As we can see, VIF values are close to 1 and correlation matrix also shows that features are independent.<br>
+Now, our features are scaled and independent.<br>
 Let's apply a regression model now.
 
 ##General multiple regression model
@@ -160,14 +231,14 @@ Let's apply a regression model now.
 model=lm(MNAD~.,pca_data)
 summary(model)
 ```
-Here,we get an adjusted- R-square value of 0.8547 and all the features are significant as well.
-Now, our model seems good.
-But, we can still drop a variable to check if our model improves or not.
+Here,we get an adjusted- R-square value of 0.8547 and all the features are significant as well.<br>
+Now, our model seems good.<br>
+But, we can still drop a variable to check if our model improves or not.<br>
 For that,we can use methods of regression for propagating back-and-forth.
 
 # METHODS OF REGRESSION
-1.Forward Selection Method
-2.Backward Elimination Method
+1.Forward Selection Method<br>
+2.Backward Elimination Method<br>
 3.Stepwise Method
 
 For our analysis,we have considered Backward elimination method.
@@ -176,8 +247,8 @@ bmodel <- step(model, direction = "backward", trace=TRUE )
 summary(bmodel)
 
 ```
-As we can see,no features are rejected in the steps of backward-elimination method.
-Thus,we can conclude that our model will include all of the 6 variables.
+As we can see,no features are rejected in the steps of backward-elimination method.<br>
+Thus,we can conclude that our model will include all of the 6 variables.<br>
 Now,let's take a look at the coefficients and confidence intervals of the features.
 
 #Coefficients
@@ -195,9 +266,9 @@ As we can see,all the coefficients lie in the confidence interval.
 Hence,our equation is
 # MNAD = 0.39147901*PC1 + 0.04093860 * PC2 + 0.02838228 * PC3 + 0.32418139 * PC4 + 0.26756121 * PC5 + 0.12913215 * PC6 + 0.01412517
 
-Now,let's get to the prediction part.
-For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions.
-Also,we should not combine the training and test set as we donot want our test set to be used in model building.
+Now,let's get to the prediction part.<br>
+For prediction,we should not use PCA on train and test separately as their variance is unequal which will result in different vector directions.<br>
+Also,we should not combine the training and test set as we donot want our test set to be used in model building.<br>
 What we can do is use predict function as shown below.
 ```{r}
 pc_data_test <- predict(prin_comp,test[-c(12)])
@@ -213,8 +284,8 @@ pc_data_test$MNAD <- test$MNAD
 pc_data_test$residuals <- pc_data_test$MNAD-pc_data_test$predicted_MNAD
 pc_data_test[1:5,7:9]
 ```
-We can see that residuals are very less which explains the accuracy of our model.
-But,we have to do residual analysis for more accurate results.
+We can see that residuals are very less which explains the accuracy of our model.<br>
+But,we have to do residual analysis for more accurate results.<br>
 Let's calculate the variance of residuals.
 ```{r}
 Se_sq <- sum((pc_data_test$residuals)^2)
@@ -256,7 +327,7 @@ plot(x,y,
      xlab = 'Standardized residuals',
      ylab = 'Probability')
 ```
-This plot is not ideal as it contains a lot of outliers.
+This plot is not ideal as it contains a lot of outliers.<br>
 Let's take a closer look.
 ```{r}
 plot(x,y,
